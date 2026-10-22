@@ -41,7 +41,7 @@ uv sync
 | `just process` | Adds Fahrenheit, mph and a rank, prints the table and writes `data/processed.json`. `just process humidity_pct 3 --ascending` sorts by another column, keeps the top 3 and puts the lowest first |
 | `just save` | Writes `output/weather_data_<timestamp>.csv`. `just save --output weather_data.csv` writes a fixed name |
 | `just chart` | Draws temperature, humidity and wind bar charts from the newest CSV into a `.png` next to it |
-| `just serve` | Starts the web server on http://localhost:8000, or another port with `just serve 9000 |
+| `just serve` | Starts the web server on http://localhost:8000, or another port with `just serve 9000` |
 | `just test` | Runs the tests |
 | `just typecheck` | Runs basedpyright |
 | `just check` | Runs the tests and basedpyright |
@@ -60,7 +60,49 @@ uv run pytest
 uv run basedpyright
 ```
 
-CSV columns: `City`, `Temperature (C)`, `Temperature (F)`, `Humidity (%)`, `Wind Speed (m/s)`, `Wind Speed (mph)`
+## Output
+
+`just run` prints a table of the cities ranked by the sort column, hottest first by default, and writes two files to `output/`:
+
+- `weather_data_<timestamp>.csv` has one row per city in rank order.
+- `weather_data_<timestamp>.png` has one bar chart each for temperature (°C), humidity and wind speed (m/s), with the value on each bar.
+
+| CSV column | Meaning |
+|---|---|
+| `City` | City name from `cities.json` or from `--cities` |
+| `Temperature (C)`, `Temperature (F)` | Air temperature 2 m above the ground |
+| `Humidity (%)` | Relative humidity 2 m above the ground |
+| `Wind Speed (m/s)`, `Wind Speed (mph)` | Wind speed 10 m above the ground |
+
+The printed table also shows `rank`, the coordinates and `time`, the UTC quarter hour the values are valid for. The CSV leaves them out to match the exercise's example output.
+
+Example run:
+
+```
+$ just run "New York,Tokyo,London"
+uv run weather-fetch --cities 'New York,Tokyo,London'
+fetched 3 cities -> data/raw.json
+uv run weather-process --sort temperature_c --top 0
+ rank     city  latitude  longitude             time  temperature_c  humidity_pct  wind_speed_ms  temperature_f  wind_speed_mph
+    1 New York   40.7128   -74.0060 2026-10-22T17:15           17.4            28           6.99           63.3            15.6
+    2   London   51.5074    -0.1278 2026-10-22T17:15           14.0            56           2.20           57.2             4.9
+    3    Tokyo   35.6895   139.6917 2026-10-22T17:15           13.5            67           0.80           56.3             1.8
+uv run weather-export
+wrote 3 rows -> output/weather_data_20261022_142136.csv
+uv run weather-chart
+chart -> output/weather_data_20261022_142136.png
+```
+
+The lines that start with `uv run` are the commands just runs for each step. The CSV it wrote:
+
+```csv
+City,Temperature (C),Temperature (F),Humidity (%),Wind Speed (m/s),Wind Speed (mph)
+New York,17.4,63.3,28,6.99,15.6
+London,14.0,57.2,56,2.2,4.9
+Tokyo,13.5,56.3,67,0.8,1.8
+```
+
+New York is the warmest and windiest of the three at that time, and Tokyo the most humid.
 
 ## Endpoints
 
