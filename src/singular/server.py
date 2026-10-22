@@ -1,5 +1,6 @@
 import io
 import time
+from datetime import datetime
 from functools import lru_cache
 
 import pandas as pd
@@ -7,7 +8,7 @@ import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
-from singular.chart import plot
+from singular.chart import OUTPUT, plot
 from singular.export import export, to_table
 from singular.fetch import fetch, load_cities
 from singular.process import process
@@ -76,5 +77,10 @@ def chart() -> Response:
 
 @app.get("/data.csv")
 def data() -> FileResponse:
-    path = export(current())
+    # one file per refresh window, so repeated downloads cannot fill the disk
+    start = datetime.fromtimestamp(bucket() * REFRESH_SECONDS)
+    path = OUTPUT / f"weather_data_{start:%Y%m%d_%H%M%S}.csv"
+    if not path.exists():
+        export(current(), str(path))
+
     return FileResponse(path, media_type="text/csv", filename=path.name)

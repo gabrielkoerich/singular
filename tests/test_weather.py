@@ -97,6 +97,7 @@ def test_server(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert png.headers["content-type"] == "image/png"
     assert png.content.startswith(b"\x89PNG")
 
+    client.get("/data.csv")
     csv = client.get("/data.csv")
     assert "attachment" in csv.headers["content-disposition"]
     assert csv.text.splitlines()[0] == ",".join(COLUMNS.values())
