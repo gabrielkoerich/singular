@@ -1,0 +1,41 @@
+[project]
+name = "singular"
+version = "0.1.0"
+description = "Weather data fetch and export"
+readme = "README.md"
+authors = [
+    { name = "Gabriel Koerich", email = "gabrielmk@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.159.1",
+    "matplotlib>=3.11.2",
+    "pandas>=3.1.0",
+    "requests>=2.34.2",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+weather-fetch = "singular.fetch:main"
+weather-process = "singular.process:main"
+weather-export = "singular.export:main"
+weather-chart = "singular.chart:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.40.2",
+    "httpx2>=2.16.0",
+    "pandas-stubs>=3.0.5.260914",
+    "pytest>=9.1.1",
+]
+
+[tool.basedpyright]
+include = ["src", "tests"]
+# argparse and JSON values are Any by design, and matplotlib stubs leave savefig partly unknown
+reportAny = false
+reportUnusedCallResult = false
+reportUnknownMemberType = false
